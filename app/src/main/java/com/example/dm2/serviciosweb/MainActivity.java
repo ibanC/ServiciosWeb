@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private String valorSpinner1;
     private String valorSpinner2;
     private String resultado;
+    private String resDouble;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-        spinner2.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        spinner2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 valorSpinner2 = adapterView.getItemAtPosition(i).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
             }
         });
         btnConvertir.setOnClickListener(new View.OnClickListener() {
@@ -84,7 +91,8 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 HttpURLConnection conn;
-                URL url=new URL("http://www.webservicex.net/length.asmx?op=ChangeLengthUnit");
+                //URL url=new URL("http://www.webservicex.net/length.asmx?op=ChangeLengthUnit");
+                URL url=new URL("http://www.webservicex.net/length.asmx/ChangeLengthUnit");
 
                 //codificamos solo los valores de los parametros
                 String param="LengthValue="+ URLEncoder.encode(params[0],"UTF-8")+"&fromLengthUnit="+URLEncoder.encode(valorSpinner1,"UTF-8")
@@ -104,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //construir la cadena para almacenar la respuesta del servidor
                 String result="";
-                resultado ="";
+                //resultado ="";
 
                 //comenzar a escuchar el stream(flujo)
                 Scanner inStream=new Scanner(conn.getInputStream());
@@ -114,8 +122,12 @@ public class MainActivity extends AppCompatActivity {
                 while(inStream.hasNextLine())
                 {
                     result=inStream.nextLine();
-                }
 
+                    resDouble = result.replace("</double>","");
+                    String pru=resDouble.substring(result.indexOf('>')+1);
+                    resDouble=pru;
+
+                }
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -125,6 +137,11 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             return null;
+        }
+        protected void onPostExecute(Void result)
+        {
+            txtResultado.setText(resDouble+"es el resultado");
+            Toast.makeText(getApplicationContext(),"es el resultado\n"+resDouble,Toast.LENGTH_LONG).show();
         }
     }
 
